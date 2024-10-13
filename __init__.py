@@ -363,7 +363,7 @@ class Command:
     def set_sep(self):
 
         sep = self.get_sep(ct.ed)
-        s = ct.dlg_input(_('Separator char:'), sep)
+        s = ct.dlg_input(_('Separator char (enter "\\t" for tab):'), sep)
         if s is None:
             return
 
