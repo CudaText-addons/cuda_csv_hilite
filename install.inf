@@ -55,6 +55,23 @@ section=commands
 caption=CSV Helper\-
 method=_
 
+[item22]
+section=commands
+caption=CSV Helper\Align columns
+method=align_columns
+lexers=$lex
+
+[item23]
+section=commands
+caption=CSV Helper\Shrink fields (trim spaces)
+method=shrink_fields
+lexers=$lex
+
+[item20]
+section=commands
+caption=CSV Helper\-
+method=_
+
 [item21]
 section=commands
 caption=CSV Helper\Set separator for current document...
