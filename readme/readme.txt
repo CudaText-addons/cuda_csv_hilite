@@ -11,6 +11,8 @@ column in the statubar (caption is read from the first line).
 
 * Plugin has several commands for manage columns.
 
+* Plugins can align columns by adding extra spaces and reduce line width by removing spaces.
+
 * Plugin has several options in config file.
 Call menu item: "Options / Settings-plugins / CSV Helper / Config".
 Config file (settings/cuda_csv_hilite.ini) looks like this:
