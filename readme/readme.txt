@@ -36,6 +36,7 @@ About
 
 Authors:
   Alexey Torgashin (CudaText)
-  Artem Gavrilov https://github.com/Artem3213212
-  Oleh Lutsak https://github.com/OlehL
+  Artem Gavrilov, https://github.com/Artem3213212
+  Oleh Lutsak, https://github.com/OlehL
+  wyxa, https://github.com/Wwyxa
 License: MIT
