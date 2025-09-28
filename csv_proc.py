@@ -1,52 +1,67 @@
 # from debug import snoop
 
 
-def parse_csv_line(s, sep=",", quote='"'):
+def parse_csv_line(s, sep=","):
     """
-    Parses one CSV line (by Artem)
-    Gets fragments as list of 3-lists: [offset_start, offset_end, kind]
-    Gets [] for incorrect line
-    kind: -1 for comma, 0+ for column
+    A more robust CSV line parser that can handle extra characters between the end of fields and the preceding delimiter.
+    Returns a list of tuples, each being (start_index, end_index, kind).
+    kind >= 0 represents the index of a data field, and kind < 0 represents a delimiter.
     """
-    if not s:
-        return []
-    # disable quote for TSV
-    if sep == '\t':
-        quote = chr(1)
     res = []
-    col, x, b = 0, 0, True
-    for i, c in enumerate(s):
-        if c == sep and b:
-            if x != i:
-                res.append([x, i, col])
-                res.append([i, i + 1, -1])
-            else:
-                if i != 0:
-                    res[-1][1] += 1
+    i = 0
+    n = len(s)
+    field_index = 0
+
+    while i <= n:
+        if i == n:
+            # Handle any possible empty fields at the end of the line
+            if s.endswith(sep):
+                res.append((n, n, field_index))
+            break
+
+        start_field = i
+        field_has_quotes = False
+
+        # Check if the field starts with a quotation mark
+        if s[i] == '"':
+            field_has_quotes = True
+            current_pos = i + 1
+            while current_pos < n:
+                if s[current_pos] == '"':
+                    # Check if it is an escaped quote ""
+                    if current_pos + 1 < n and s[current_pos + 1] == '"':
+                        current_pos += 2  # Skip the escaped quotes
+                    else:
+                        # Find the closing quotation mark and exit the inner loop.
+                        current_pos += 1
+                        break
                 else:
-                    if x == 0:
-                        res.append([0, 0, 0])
-                    res.append([0, 1, -1])
-            x = i + 1
-            col += 1
-        elif c == quote:
-            b = not b
-    if x != len(s):
-        res.append([x, len(s), col])
-    if not b:
-        return []
-    s = s.replace(quote * 2, "")
-    i = -1
-    while True:
-        i = s.find(quote, i + 1)
-        if i == -1:
-            return res
-        if not (i == 0 or s[i - 1] == sep):
-            break
-        i = s.find(quote, i + 1)
-        if not (i == len(s) - 1 or s[i + 1] == sep):
-            break
-    return []
+                    current_pos += 1
+            # Find the actual end of the field, i.e., the next delimiter.
+            next_sep_pos = s.find(sep, current_pos)
+        else:
+            # Non-quoted field, directly find the next delimiter
+            next_sep_pos = s.find(sep, i)
+
+        if next_sep_pos == -1:
+            # This is the last field
+            end_field = n
+            i = n + 1  # End the main loop
+        else:
+            end_field = next_sep_pos
+            i = next_sep_pos + 1
+
+        res.append((start_field, end_field, field_index))
+        field_index += 1
+
+        if next_sep_pos != -1:
+            res.append((end_field, i, -1))  # Add delimiter
+
+    if not s and n == 0:
+        res.append((0, 0, 0))
+
+    return res
+
 
 # @snoop()
 def parse_csv_line_as_dict(s, sep=",", quote='"'):

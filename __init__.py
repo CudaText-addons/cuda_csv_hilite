@@ -1,4 +1,5 @@
 import os
+import unicodedata
 import cudatext as ct
 import cudatext_cmd
 from cudax_lib import html_color_to_int
@@ -47,6 +48,18 @@ def _theme_item(name):
         return _theme[name]["color_font"]
     else:
         return 0x808080
+
+
+# Helper Function: Calculate the visual width of a string (full-width characters count as 2, half-width as 1)
+def get_visual_width(s):
+    width = 0
+    for char in s:
+        # 'F' (Fullwidth), 'W' (Wide), 'A' (Ambiguous) 都被视为全角
+        if unicodedata.east_asian_width(char) in ("F", "W", "A"):
+            width += 2
+        else:
+            width += 1
+    return width
 
 
 class Command:
@@ -386,3 +399,84 @@ class Command:
         if lex in [LEXER_CSV, LEXER_TSV]:
             self.ed_ = ed_self
             self.update_work()
+
+    def align_columns(self):
+        ed = ct.ed
+        sep = self.get_sep(ed)
+        if not sep:
+            return
+        lines = ed.get_text_all().splitlines()
+        if not lines:
+            return
+        # 1. Parse all lines
+        parsed_data = []
+        for line in lines:
+            fields = [line[x1:x2] for x1, x2, kind in parse_csv_line(line, sep=sep) if kind >= 0]
+            parsed_data.append(fields)
+        if not any(parsed_data):
+            return
+        # 2. Determine the maximum number of columns for the entire file
+        num_columns = 0
+        try:
+            num_columns = max(len(row) for row in parsed_data if row)
+        except ValueError:
+            return  # The file only contains blank lines.
+        # 3. Unify the number of columns across all rows, padding with empty strings for any that are short.
+        for row in parsed_data:
+            while len(row) < num_columns:
+                row.append("")
+        # 4. Calculate the maximum width of each column using visual width.
+        max_widths = [0] * num_columns
+        for row in parsed_data:
+            for i, field in enumerate(row):
+                if i < num_columns:
+                    width = get_visual_width(field)
+                    if width > max_widths[i]:
+                        max_widths[i] = width
+        # 5. Build a newly aligned text.
+        new_lines = []
+        for row in parsed_data:
+            new_row = []
+            for i, field in enumerate(row):
+                # Use the visual width to calculate the number of spaces needed to fill.
+                visual_width = get_visual_width(field)
+                padding = " " * (max_widths[i] - visual_width)
+                padded_field = field + padding
+                new_row.append(padded_field)
+            new_lines.append(sep.join(new_row))
+        ed.set_text_all("\n".join(new_lines))
+        ct.msg_status("CSV columns aligned")
+
+    def shrink_fields(self):
+        ed = ct.ed
+        sep = self.get_sep(ed)
+        if not sep:
+            return
+
+        lines = ed.get_text_all().splitlines()
+        new_lines = []
+
+        for line in lines:
+            parsed_fields = parse_csv_line(line, sep=sep)
+            if not parsed_fields:
+                new_lines.append(line)
+                continue
+
+            fields = []
+            # Extract each field, remove spaces, and retain delimiters.
+            for x1, x2, kind in parsed_fields:
+                field_text = line[x1:x2]
+                if kind >= 0:  # Data field
+                    # Handle cases with quotes
+                    if field_text.startswith('"') and field_text.endswith('"'):
+                        inner_text = field_text[1:-1].strip()
+                        fields.append(f'"{inner_text}"')
+                    else:
+                        fields.append(field_text.strip())
+                else:  # Separator
+                    fields.append(field_text)
+
+            new_lines.append("".join(fields))
+
+        ed.set_text_all("\n".join(new_lines))
+        msg(_("Fields shrunk"))
