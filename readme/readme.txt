@@ -4,16 +4,20 @@ different columns in different colors.
 Plugin creates "CSV ^" and "TSV ^" lexers at startup (without creating files, these
 are 'virtual' in-memory lexers), and these lexers are used to detect data files.
 
-Features:
+Features
+--------
 
-* Plugin handles hovering mouse over text: it shows index/caption of current
+Plugin handles hovering mouse over text: it shows index/caption of current
 column in the statubar (caption is read from the first line).
 
-* Plugin has several commands for manage columns.
+Plugin gives several commands (in the menu "Plugins / CSV Helper") to manage columns.
+Command "Align columns" aligns columns by adding extra spaces.
+Command "Shrink fields (trim spaces)" reduces line width by removing spaces.
 
-* Plugins can align columns by adding extra spaces and reduce line width by removing spaces.
+Options
+-------
 
-* Plugin has several options in config file.
+Plugin has several options in config file.
 Call menu item: "Options / Settings-plugins / CSV Helper / Config".
 Config file (settings/cuda_csv_hilite.ini) looks like this:
 
@@ -27,6 +31,8 @@ Config file (settings/cuda_csv_hilite.ini) looks like this:
 After changing config file, perform a reload of opened CSV and TSV files in order
 to apply new settings.
 
+About
+-----
 
 Authors:
   Alexey Torgashin (CudaText)
