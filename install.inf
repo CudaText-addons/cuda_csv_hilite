@@ -15,36 +15,36 @@ lexers=$lex
 section=events
 events=on_start,on_lexer~
 
-[item11]
+[item3]
 section=events
 events=on_save~
 lexers=Ini files
 
-[item2]
+[item10]
 section=commands
 caption=CSV Helper\Insert column
 method=new_col
 lexers=$lex
 
-[item3]
+[item11]
 section=commands
 caption=CSV Helper\Insert column, righter
 method=rnew_col
 lexers=$lex
 
-[item4]
+[item12]
 section=commands
 caption=CSV Helper\Delete current column
 method=del_current_col
 lexers=$lex
 
-[item5]
+[item13]
 section=commands
 caption=CSV Helper\Move current column to the left
 method=move_left_current_col
 lexers=$lex
 
-[item6]
+[item14]
 section=commands
 caption=CSV Helper\Move current column to the right
 method=move_right_current_col
@@ -55,24 +55,24 @@ section=commands
 caption=CSV Helper\-
 method=_
 
-[item22]
+[item21]
 section=commands
 caption=CSV Helper\Align columns
 method=align_columns
 lexers=$lex
 
-[item23]
+[item22]
 section=commands
 caption=CSV Helper\Shrink fields (trim spaces)
 method=shrink_fields
 lexers=$lex
 
-[item20]
+[item30]
 section=commands
 caption=CSV Helper\-
 method=_
 
-[item21]
+[item31]
 section=commands
 caption=CSV Helper\Set separator for current document...
 method=set_sep
