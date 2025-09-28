@@ -53,9 +53,11 @@ def _theme_item(name):
 # Helper Function: Calculate the visual width of a string (full-width characters count as 2, half-width as 1)
 def get_visual_width(s):
     width = 0
-    for char in s:
+    for c in s:
+        if c in '™®':
+            width += 1
         # 'F' (Fullwidth), 'W' (Wide), 'A' (Ambiguous) 都被视为全角
-        if unicodedata.east_asian_width(char) in ("F", "W", "A"):
+        elif unicodedata.east_asian_width(c) in ("F", "W", "A"):
             width += 2
         else:
             width += 1
