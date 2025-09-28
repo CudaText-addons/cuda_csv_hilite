@@ -3,9 +3,9 @@
 
 def parse_csv_line(s, sep=","):
     """
-    一个更健壮的CSV行解析器，能够处理字段结束后、分隔符前的额外字符。
-    返回一个元组列表，每个元组为 (start_index, end_index, kind)。
-    kind >= 0 代表数据字段的索引，kind < 0 代表分隔符。
+    A more robust CSV line parser that can handle extra characters between the end of fields and the preceding delimiter.
+    Returns a list of tuples, each being (start_index, end_index, kind).
+    kind >= 0 represents the index of a data field, and kind < 0 represents a delimiter.
     """
     res = []
     i = 0
@@ -14,7 +14,7 @@ def parse_csv_line(s, sep=","):
 
     while i <= n:
         if i == n:
-            # 处理行尾可能存在的空字段
+            # Handle any possible empty fields at the end of the line
             if s.endswith(sep):
                 res.append((n, n, field_index))
             break
@@ -22,31 +22,31 @@ def parse_csv_line(s, sep=","):
         start_field = i
         field_has_quotes = False
 
-        # 检查字段是否以引号开头
+        # Check if the field starts with a quotation mark
         if s[i] == '"':
             field_has_quotes = True
             current_pos = i + 1
             while current_pos < n:
                 if s[current_pos] == '"':
-                    # 检查是否为转义引号 ""
+                    # Check if it is an escaped quote ""
                     if current_pos + 1 < n and s[current_pos + 1] == '"':
-                        current_pos += 2  # 跳过转义引号
+                        current_pos += 2  # Skip the escaped quotes
                     else:
-                        # 找到结束引号，跳出内部循环
+                        # Find the closing quotation mark and exit the inner loop.
                         current_pos += 1
                         break
                 else:
                     current_pos += 1
-            # 找到字段的实际结尾，即下一个分隔符
+            # Find the actual end of the field, i.e., the next delimiter.
             next_sep_pos = s.find(sep, current_pos)
         else:
-            # 非引用字段，直接找到下一个分隔符
+            # Non-quoted field, directly find the next delimiter
             next_sep_pos = s.find(sep, i)
 
         if next_sep_pos == -1:
-            # 这是最后一个字段
+            # This is the last field
             end_field = n
-            i = n + 1  # 结束主循环
+            i = n + 1  # End the main loop
         else:
             end_field = next_sep_pos
             i = next_sep_pos + 1
@@ -55,7 +55,7 @@ def parse_csv_line(s, sep=","):
         field_index += 1
 
         if next_sep_pos != -1:
-            res.append((end_field, i, -1))  # 添加分隔符
+            res.append((end_field, i, -1))  # Add delimiter
 
     if not s and n == 0:
         res.append((0, 0, 0))

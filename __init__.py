@@ -52,7 +52,6 @@ def _theme_item(name):
         return 0x808080
 
 
-# 帮助函数：计算字符串的视觉宽度（全角字符算2，半角算1）
 # Helper Function: Calculate the visual width of a string (full-width characters count as 2, half-width as 1)
 def get_visual_width(s):
     width = 0
@@ -400,44 +399,42 @@ class Command:
         lines = ed.get_text_all().splitlines()
         if not lines:
             return
-        # 1. 解析所有行
+        # 1. Parse all lines
         parsed_data = []
         for line in lines:
             fields = [line[x1:x2] for x1, x2, kind in parse_csv_line(line, sep=sep) if kind >= 0]
             parsed_data.append(fields)
         if not any(parsed_data):
             return
-        # 2. 确定整个文件的最大列数
+        # 2. Determine the maximum number of columns for the entire file
         num_columns = 0
         try:
             num_columns = max(len(row) for row in parsed_data if row)
         except ValueError:
-            return  # 文件只包含空行
-        # 3. (关键修复) 统一所有行的列数，不足的用空字符串补齐
+            return  # The file only contains blank lines.
+        # 3. Unify the number of columns across all rows, padding with empty strings for any that are short.
         for row in parsed_data:
             while len(row) < num_columns:
                 row.append("")
-        # 4. (关键修复) 使用视觉宽度计算每列的最大宽度
+        # 4. Calculate the maximum width of each column using visual width.
         max_widths = [0] * num_columns
         for row in parsed_data:
             for i, field in enumerate(row):
-                # 确保不会索引越界
                 if i < num_columns:
                     width = get_visual_width(field)
                     if width > max_widths[i]:
                         max_widths[i] = width
-        # 5. 构建对齐后的新文本
+        # 5. Build a newly aligned text.
         new_lines = []
         for row in parsed_data:
             new_row = []
             for i, field in enumerate(row):
-                # 使用视觉宽度来计算需要填充的空格数
+                # Use the visual width to calculate the number of spaces needed to fill.
                 visual_width = get_visual_width(field)
                 padding = " " * (max_widths[i] - visual_width)
                 padded_field = field + padding
                 new_row.append(padded_field)
             new_lines.append(sep.join(new_row))
-        # 更新编辑器内容
         ed.set_text_all("\n".join(new_lines))
         ct.msg_status("CSV columns aligned")
 
@@ -457,21 +454,20 @@ class Command:
                 continue
 
             fields = []
-            # 提取每个字段，去除空格，并保留分隔符
+            # Extract each field, remove spaces, and retain delimiters.
             for x1, x2, kind in parsed_fields:
                 field_text = line[x1:x2]
-                if kind >= 0:  # 数据字段
-                    # 处理带引号的情况
+                if kind >= 0:  # Data field
+                    # Handle cases with quotes
                     if field_text.startswith('"') and field_text.endswith('"'):
                         inner_text = field_text[1:-1].strip()
                         fields.append(f'"{inner_text}"')
                     else:
                         fields.append(field_text.strip())
-                else:  # 分隔符
+                else:  # Separator
                     fields.append(field_text)
 
             new_lines.append("".join(fields))
 
-        # 更新编辑器
         ed.set_text_all("\n".join(new_lines))
         msg(_("Fields shrunk"))
