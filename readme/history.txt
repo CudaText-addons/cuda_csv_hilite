@@ -1,3 +1,8 @@
+2025.09.28
++ add: command "Align columns", which also considers full-width CJK chars as wider chars (by @Wwyxa)
++ add: command "Shrink fields (trim spaces)" (by @Wwyxa)
+* reworked the core function of CSV parser (by @Wwyxa)
+
 2023.12.16
 + add: plugin now don't need installed lite lexers CSV^ and TSV^, so remove them from folder "data/lexliblite"; plugin will create these lexers as 'virtual' lexers on startup, so lexers will be still visible
 
