@@ -4,17 +4,15 @@ import cudatext as ct
 import cudatext_cmd
 from cudax_lib import html_color_to_int
 from .csv_proc import parse_csv_line, parse_csv_line_as_dict
-
 # from debug import snoop
 
 from cudax_lib import get_translation
-
 _ = get_translation(__file__)  # I18N
 
 
 fn_config = os.path.join(ct.app_path(ct.APP_DIR_SETTINGS), "cuda_csv_hilite.ini")
 
-MYTAG = ct.app_proc(ct.PROC_GET_UNIQUE_TAG, "")
+MYTAG = ct.app_proc(ct.PROC_GET_UNIQUE_TAG, '')
 TIMERTIME = 150
 TIMERCALL = "module=cuda_csv_hilite;cmd=timer_tick;"
 LEXER_CSV = "CSV ^"
@@ -31,7 +29,7 @@ option_separator = ","
 
 
 def msg(s):
-    ct.msg_status(_("CSV Helper: ") + s)
+    ct.msg_status(_('CSV Helper: ')+s)
 
 
 def bool_to_str(v):
@@ -73,9 +71,15 @@ class Command:
         global option_use_theme_colors
         global option_separator
 
-        option_color_comma = ct.ini_read(fn_config, "op", "color_comma", option_color_comma)
-        option_colors_fixed = ct.ini_read(fn_config, "op", "colors_fixed", option_colors_fixed)
-        option_colors_themed = ct.ini_read(fn_config, "op", "colors_themed", option_colors_themed)
+        option_color_comma = ct.ini_read(
+            fn_config, "op", "color_comma", option_color_comma
+        )
+        option_colors_fixed = ct.ini_read(
+            fn_config, "op", "colors_fixed", option_colors_fixed
+        )
+        option_colors_themed = ct.ini_read(
+            fn_config, "op", "colors_themed", option_colors_themed
+        )
         option_use_theme_colors = str_to_bool(
             ct.ini_read(
                 fn_config,
@@ -85,7 +89,9 @@ class Command:
             )
         )
 
-        option_separator = ct.ini_read(fn_config, "op", "separator", option_separator)
+        option_separator = ct.ini_read(
+            fn_config, "op", "separator", option_separator
+        )
 
         self.update_colors()
 
@@ -100,8 +106,8 @@ class Command:
 
     def on_start(self, ed_self):
 
-        ct.lexer_proc(ct.LEXER_ADD_VIRTUAL, ("CSV", "*.csv", "", "", ""))
-        ct.lexer_proc(ct.LEXER_ADD_VIRTUAL, ("TSV", "*.tsv", "", "", ""))
+        ct.lexer_proc(ct.LEXER_ADD_VIRTUAL, ('CSV', '*.csv', '', '', ''))
+        ct.lexer_proc(ct.LEXER_ADD_VIRTUAL, ('TSV', '*.tsv', '', '', ''))
 
     def on_open(self, ed_self):
 
@@ -110,7 +116,7 @@ class Command:
 
     def on_save(self, ed_self):
 
-        if ed_self.get_filename("*").lower() == fn_config.lower():
+        if ed_self.get_filename('*').lower() == fn_config.lower():
             self.__init__()
 
     def on_scroll(self, ed_self):
@@ -164,16 +170,16 @@ class Command:
         global option_separator
 
         # support custom separator per editor
-        s = ed.get_prop(ct.PROP_TAG, "sep:")
+        s = ed.get_prop(ct.PROP_TAG, 'sep:')
         if s:
             return s
         lex = ed.get_prop(ct.PROP_LEXER_FILE, "")
-        if lex == LEXER_TSV:
-            return "\t"
-        elif lex == LEXER_CSV:
+        if lex==LEXER_TSV:
+            return '\t'
+        elif lex==LEXER_CSV:
             return option_separator
         else:
-            return ""
+            return ''
 
     def update_work(self):
 
@@ -185,7 +191,8 @@ class Command:
 
         pagesize = ed.get_prop(ct.PROP_VISIBLE_LINES)
         line1 = max(ed.get_prop(ct.PROP_LINE_TOP) - pagesize, 0)
-        line2 = min(ed.get_prop(ct.PROP_LINE_BOTTOM) + pagesize, ed.get_line_count() - 1)
+        line2 = min(ed.get_prop(ct.PROP_LINE_BOTTOM) + pagesize,
+                    ed.get_line_count() - 1)
 
         for line in range(line1, line2 + 1):
             s = ed.get_text_line(line)
@@ -259,11 +266,11 @@ class Command:
     def get_current_col(self, sep):
         carets = ct.ed.get_carets()
         if len(carets) > 1:
-            msg(_("multi-carets not supported"))
+            msg(_('multi-carets not supported'))
             return
         x0, y0, x1, y1 = carets[0]
         if x1 != -1 or y1 != -1:
-            msg(_("selection not supported"))
+            msg(_('selection not supported'))
             return
         line = ct.ed.get_text_line(y0)
         for k, v in parse_csv_line_as_dict(line, sep=sep).items():
@@ -271,13 +278,13 @@ class Command:
                 return k
 
     # @snoop()
-    def current_col_do(self, what="del"):
+    def current_col_do(self, what='del'):
 
         sep = self.get_sep(ct.ed)
         current_col = self.get_current_col(sep)
         if current_col is None:
             return
-        lines = ct.ed.get_text_all().split("\n")
+        lines = ct.ed.get_text_all().split('\n')
 
         carets = ct.ed.get_carets()
         cur_x0, cur_y0, _, _ = carets[0]
@@ -290,59 +297,61 @@ class Command:
                 break
             last_col = max(_csv.keys())
             if last_col < current_col:
-                msg(_("file contains a different number of columns"))
+                msg(_('file contains a different number of columns'))
                 return
             x0, x1 = _csv[current_col]
 
-            if what == "new":
+            if what == 'new':
                 new_text.append((x0, y))
                 markers.append((x0, y, y))
 
-            elif what == "rnew":
+            elif what == 'rnew':
                 new_text.append((x1, y))
-                markers.append((x1 + 1, y, y))
+                markers.append((x1+1, y, y))
 
-            elif what == "del":
+            elif what == 'del':
                 if y == cur_y0:
                     cur_x0 = x0
                 if current_col == 0:
-                    new_line = line[:x0] + line[x1 + 1 :]
+                    new_line = line[:x0] + line[x1+1:]
                 else:
-                    new_line = line[: x0 - 1] + line[x1:]
+                    new_line = line[:x0-1] + line[x1:]
                 new_text.append(new_line)
 
-            elif what == "move_left":
+            elif what == 'move_left':
                 if current_col == 0:
                     break
                 else:
-                    prev_x0, prev_x1 = _csv[current_col - 1]
+                    prev_x0, prev_x1 = _csv[current_col-1]
                     if y == cur_y0:
                         cur_x0 = cur_x0 - x0 + prev_x0
-                    new_line = line[:prev_x0] + line[x0:x1] + sep + line[prev_x0:prev_x1] + line[x1:]
+                    new_line = line[:prev_x0] + line[x0:x1] +\
+                        sep + line[prev_x0:prev_x1] + line[x1:]
                     new_text.append(new_line)
 
-            elif what == "move_right":
+            elif what == 'move_right':
                 if current_col == last_col:
                     break
                 else:
-                    next_x0, next_x1 = _csv[current_col + 1]
+                    next_x0, next_x1 = _csv[current_col+1]
                     if y == cur_y0:
                         cur_x0 = cur_x0 + next_x1 - next_x0 + 1
-                    new_line = line[:x0] + line[next_x0:next_x1] + sep + line[x0:x1] + line[next_x1:]
+                    new_line = line[:x0] + line[next_x0:next_x1] +\
+                        sep + line[x0:x1] + line[next_x1:]
                     new_text.append(new_line)
 
         ct.ed.markers(ct.MARKERS_DELETE_ALL)
 
-        if what in ["new", "rnew"]:
+        if what in ['new', 'rnew']:
             for s in new_text:
                 ct.ed.insert(*s, sep)
             markers.reverse()
             for m in markers:
                 ct.ed.markers(ct.MARKERS_ADD, *m)
-            ct.ed.set_prop(ct.PROP_TAB_COLLECT_MARKERS, "1")
+            ct.ed.set_prop(ct.PROP_TAB_COLLECT_MARKERS, '1')
             ct.ed.cmd(cudatext_cmd.cmd_Markers_GotoLastAndDelete)
 
-        elif what in ["del", "move_left", "move_right"]:
+        elif what in ['del', 'move_left', 'move_right']:
             for i, s in enumerate(new_text):
                 ct.ed.set_text_line(i, s)
             ct.ed.set_caret(cur_x0, cur_y0)
@@ -350,19 +359,19 @@ class Command:
         self.update()
 
     def new_col(self):
-        self.current_col_do("new")
+        self.current_col_do('new')
 
     def rnew_col(self):
-        self.current_col_do("rnew")
+        self.current_col_do('rnew')
 
     def del_current_col(self):
-        self.current_col_do("del")
+        self.current_col_do('del')
 
     def move_left_current_col(self):
-        self.current_col_do("move_left")
+        self.current_col_do('move_left')
 
     def move_right_current_col(self):
-        self.current_col_do("move_right")
+        self.current_col_do('move_right')
 
     def set_sep(self):
 
@@ -371,14 +380,14 @@ class Command:
         if s is None:
             return
 
-        if s == "\\t":
-            s = "\t"
+        if s == '\\t':
+            s = '\t'
 
         if len(s) != 1:
-            msg(_("Incorrect separator: ") + s)
+            msg(_('Incorrect separator: ')+s)
             return
 
-        ct.ed.set_prop(ct.PROP_TAG, "sep:" + s)
+        ct.ed.set_prop(ct.PROP_TAG, 'sep:'+s)
         self.update()
         ct.ed.action(ct.EDACTION_UPDATE)
 
