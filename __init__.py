@@ -118,7 +118,7 @@ class Command:
 
     def on_save(self, ed_self):
 
-        if ed_self.get_filename('*').lower() == fn_config.lower():
+        if ed_self.get_prop(ct.PROP_FN, '').lower() == fn_config.lower():
             self.__init__()
 
     def on_scroll(self, ed_self):

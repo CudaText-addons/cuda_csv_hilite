@@ -1,3 +1,6 @@
+2026.11.21
+- fix: avoid depracated API: get_filename
+
 2025.09.28
 + add: command "Align columns", which also considers full-width CJK chars as wider chars (by @Wwyxa)
 + add: command "Shrink fields (trim spaces)" (by @Wwyxa)
